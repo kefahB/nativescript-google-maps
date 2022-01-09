@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nativescript_google_maps_api_key">_YOUR_API_KEY_</string>
+</resources>
