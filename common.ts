@@ -1,8 +1,8 @@
-import { Observable } from '@nativescript/core';
+import { Label, Observable } from '@nativescript/core';
 import {
     Position, Marker, Shape, Polyline, Polygon, Projection,
     Circle, Camera, MarkerEventData, ShapeEventData, VisibleRegion,
-    CameraEventData, PositionEventData, Bounds, Style, UISettings, IndoorBuilding, IndoorLevel,
+    CameraEventData, PositionEventData, Bounds, StyleBase, UISettings, IndoorBuilding, IndoorLevel,
     IndoorLevelActivatedEventData, BuildingFocusedEventData
 } from "./index";
 import { Point } from "@nativescript/core/ui/core/view";
@@ -87,7 +87,7 @@ function onDescendantsLoaded(view: View, callback: () => void) {
 }
 
 // @ts-ignore
-export { Style as StyleBase };
+export { StyleBase };
 
 export module knownTemplates {
     export const infoWindowTemplate = "infoWindowTemplate";
@@ -197,7 +197,7 @@ export abstract class GoogleMapsCommon extends View {
             view = marker._infoWindowView;
             return view;
         }
-
+    
         const template: KeyedTemplate = this._getInfoWindowTemplate(marker);
 
         if (template) view = template.createView();
@@ -237,7 +237,6 @@ export abstract class GoogleMapsCommon extends View {
     public _getInfoWindowTemplate(marker: MarkerBase): KeyedTemplate {
         if(marker){
             const templateKey = marker.infoWindowTemplate;
-            console.log(templateKey)
             for (let i = 0, length = this._infoWindowTemplates.length; i < length; i++) {
                 if (this._infoWindowTemplates[i].key === templateKey) {
                     return this._infoWindowTemplates[i];
@@ -259,7 +258,7 @@ export abstract class GoogleMapsCommon extends View {
 
     public abstract findShape(callback: (shape: Shape) => boolean): Shape;
 
-    public abstract setStyle(style: Style): boolean;
+    public abstract setStyle(style: StyleBase): boolean;
 
     public abstract updateCamera(): void;
 

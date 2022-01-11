@@ -1,8 +1,8 @@
-import {  BoundsBase, CircleBase, MarkerBase, PolygonBase, PolylineBase, ProjectionBase, PositionBase, ShapeBase, VisibleRegionBase, StyleBase, UISettingsBase, NativescriptGoogleMapsCommon } from "./common";
+import {  BoundsBase, CircleBase, MarkerBase, PolygonBase, PolylineBase, ProjectionBase, PositionBase, ShapeBase, VisibleRegionBase, StyleBase, UISettingsBase, GoogleMapsCommon } from "./common";
 import { Image, Color } from "@nativescript/core";
 import { Point } from "@nativescript/core/ui/core/view";
 
-export declare class MapView extends NativescriptGoogleMapsCommon {
+export declare class GoogleMaps extends GoogleMapsCommon {
     protected _markers: Array<Marker>;
     private _delegate;
     private _indoorDelegate;
