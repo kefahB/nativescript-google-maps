@@ -7,7 +7,7 @@ NativeScript plugin for the Google Maps SDK
 
 >This version include the new maps Renderer for android that Google Maps just [annonce it](https://developers.google.com/maps/documentation/android-sdk/renderer)
 
-[![NPM version][npm-image]][npm-url]
+![NPM version](https://img.shields.io/badge/npm-1.0.2-green)
 
 [npm-url]: https://www.npmjs.com/package/@kefah/nativescript-google-maps
 [npm-image]: https://www.npmjs.com/package/@kefah/nativescript-google-maps.svg
@@ -34,9 +34,10 @@ tns plugin add @kefah/nativescript-google-maps
 Setup
 ===
 
-See demo code included [here](https://github.com/kefahB/nativescript-google-maps.git/tree/master/demo)
+### Demo
+Please clone [this plugin demo](https://github.com/kefahB/packages) and go to tools/assets/App_Resources/Android/src/main/res/values/nativescript_google_maps_api.xml and change Your_KEY by your real google maps key.
 
-See a live demo [here](https://tinyurl.com/m7ndp7u)
+Then run npm start and choose apps.demo-angular.android for Angular or whatever your technologie...
  
 ## Configure API Key for Android
 
