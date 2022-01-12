@@ -1,4 +1,4 @@
-import { Application, AndroidApplication } from "@nativescript/core";
+import { Application, AndroidApplication, AndroidActivityEventData } from "@nativescript/core";
 
 import {
     GoogleMapsCommon, BoundsBase, CircleBase,
@@ -27,7 +27,7 @@ export abstract class GoogleMaps extends GoogleMapsCommon {
     onLoaded() {
         super.onLoaded();
 
-        Application.android.on(AndroidApplication.activityPausedEvent, this.onActivityPaused, this);
+        Application.android.on(AndroidApplication.activityResultEvent, this.onActivityPaused, this);
         Application.android.on(AndroidApplication.activityResumedEvent, this.onActivityResumed, this);
         Application.android.on(AndroidApplication.saveActivityStateEvent, this.onActivitySaveInstanceState, this);
         Application.android.on(AndroidApplication.activityDestroyedEvent, this.onActivityDestroyed, this);
@@ -40,6 +40,26 @@ export abstract class GoogleMaps extends GoogleMapsCommon {
         Application.android.off(AndroidApplication.activityResumedEvent, this.onActivityResumed, this);
         Application.android.off(AndroidApplication.saveActivityStateEvent, this.onActivitySaveInstanceState, this);
         Application.android.off(AndroidApplication.activityDestroyedEvent, this.onActivityDestroyed, this);
+    }
+
+
+    private initialize() {
+
+        const LATEST = com.google.android.gms.maps.MapsInitializer.Renderer.LATEST;
+        const LEGACY = com.google.android.gms.maps.MapsInitializer.Renderer.LEGACY;
+
+        com.google.android.gms.maps.MapsInitializer.initialize(this._context, LEGACY, new com.google.android.gms.maps.OnMapsSdkInitializedCallback({
+            onMapsSdkInitialized: (renderer) => {
+                switch (renderer) {
+                    case LATEST:
+                      console.log("Google Maps :", "The latest version of the renderer is used.");
+                      break;
+                    case LEGACY:
+                      console.log("Google Maps :", "The legacy version of the renderer is used.");
+                      break;
+                }
+            }
+        }));
     }
 
     public disposeNativeView() {
@@ -56,6 +76,16 @@ export abstract class GoogleMaps extends GoogleMapsCommon {
         this._shapes = undefined;
         super.disposeNativeView();
     };
+
+    private onActivityCreated(args) {
+        if (!this.nativeView || this._context != args.activity) return;
+        this.nativeView.onCreate(args);
+    }
+
+    private onActivityStarted(args) {
+        if (!this.nativeView || this._context != args.activity) return;
+        this.nativeView.onStart();
+    }
 
     private onActivityPaused(args) {
         if (!this.nativeView || this._context != args.activity) return;
@@ -84,29 +114,16 @@ export abstract class GoogleMaps extends GoogleMapsCommon {
         if (cameraPosition) options = options.camera(cameraPosition);
         this.nativeView = new com.google.android.gms.maps.MapView(this._context, options);
 
-        const LATEST = com.google.android.gms.maps.MapsInitializer.Renderer.LATEST;
-        const LEGACY = com.google.android.gms.maps.MapsInitializer.Renderer.LEGACY;
-
-        com.google.android.gms.maps.MapsInitializer.initialize(this._context, LATEST, new com.google.android.gms.maps.OnMapsSdkInitializedCallback({
-            onMapsSdkInitialized: (renderer) => {
-                switch (renderer) {
-                    case LATEST:
-                      console.log("Google Maps :", "The latest version of the renderer is used.");
-                      break;
-                    case LEGACY:
-                      console.log("Google Maps :", "The legacy version of the renderer is used.");
-                      break;
-                }
-            }
-        }));
-
+        this.initialize()
         this.nativeView.onCreate(null);
         this.nativeView.onResume();
         
-        let that = new WeakRef(this);
+        //let that = new WeakRef(this);
+        let that = this;
         var mapReadyCallback = new com.google.android.gms.maps.OnMapReadyCallback({
             onMapReady: (gMap) => {
-                var owner = that.get();
+                //var owner = that.get();
+                var owner = this;
                 owner._gMap = gMap;
                 owner.setMinZoomMaxZoom();
                 owner.updatePadding();
@@ -328,15 +345,13 @@ export abstract class GoogleMaps extends GoogleMapsCommon {
                         }
                     }));
                 }
-    
-
-
+  
                 owner.notifyMapReady();
             }
         });
 
         this.nativeView.getMapAsync(mapReadyCallback);
-
+        
         return this.nativeView;
     }
 
@@ -659,6 +674,243 @@ export class UISettings implements UISettingsBase {
     }
 }
 
+export class Marker extends MarkerBase {
+    private _android: any;
+    private _color: number;
+    private _icon: Image;
+    private _isMarker: boolean = false;
+
+    static CLASS = 'com.google.android.gms.maps.model.Marker';
+
+    constructor() {
+        super();
+        this.android = new com.google.android.gms.maps.model.MarkerOptions();
+    }
+
+
+    
+
+    // @ts-ignore
+    get position() {
+        return new Position(this._android.getPosition());
+    }
+
+    set position(value: Position) {
+        if (this._isMarker) {
+            this._android.setPosition(value.android);
+        } else {
+            this._android.position(value.android);
+        }
+    }
+
+    
+
+    // @ts-ignore
+    get rotation() {
+        return this._android.getRotation();
+    }
+
+    set rotation(value: number) {
+        if (this._isMarker) {
+            this._android.setRotation(value);
+        } else {
+            this._android.rotation(value);
+        }
+    }
+
+    
+
+    // @ts-ignore
+    get zIndex() {
+        return this._android.getZIndex();
+    }
+
+    set zIndex(value: number) {
+        if (this._isMarker) {
+            this._android.setZIndex(value);
+        } else {
+            this._android.zIndex(value);
+        }
+    }
+
+    
+
+    // @ts-ignore
+    get title() {
+        return this._android.getTitle();
+    }
+
+    set title(title: string) {
+        if (this._isMarker) {
+            this._android.setTitle(title);
+        } else {
+            this._android.title(title);
+        }
+    }
+
+    
+
+    // @ts-ignore
+    get snippet() {
+        return this._android.getSnippet();
+    }
+
+    set snippet(snippet: string) {
+        if (this._isMarker) {
+            this._android.setSnippet(snippet);
+        } else {
+            this._android.snippet(snippet);
+        }
+    }
+
+    showInfoWindow(): void {
+        if (this._isMarker) {
+            this.android.showInfoWindow();
+        }
+    }
+
+    isInfoWindowShown(): boolean {
+        console.log(">>> ", this._android.isInfoWindowShown())
+        return (this._isMarker) ? this._android.showInfoWindow() : false;
+    }
+
+    hideInfoWindow(): void {
+        if (this._isMarker) {
+            this.android.hideInfoWindow();
+        }
+    }
+
+    
+
+    // @ts-ignore
+    get color() {
+        return this._color;
+    }
+
+    set color(value: Color | string | number) {
+        value = getColorHue(value);
+
+        this._color = value;
+
+        var androidIcon = (value) ? com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(value) : null;
+        if (this._isMarker) {
+            this._android.setIcon(androidIcon);
+        } else {
+            this._android.icon(androidIcon);
+        }
+    }
+
+    
+
+    // @ts-ignore
+    get icon() {
+        return this._icon;
+    }
+
+    set icon(value: Image | string) {
+        if (typeof value === 'string') {
+            var tempIcon = new Image();
+            tempIcon.imageSource = ImageSource.fromResourceSync(String(value));
+            value = tempIcon;
+        }
+        this._icon = value;
+        var androidIcon = (value) ? com.google.android.gms.maps.model.BitmapDescriptorFactory.fromBitmap(value.imageSource.android) : null;
+        if (this._isMarker) {
+            this._android.setIcon(androidIcon);
+        } else {
+            this._android.icon(androidIcon);
+        }
+    }
+
+    
+
+    // @ts-ignore
+    get alpha() {
+        return this._android.getAlpha();
+    }
+
+    set alpha(value: number) {
+        if (this._isMarker) {
+            this._android.setAlpha(value);
+        } else {
+            this._android.alpha(value);
+        }
+    }
+
+    
+
+    // @ts-ignore
+    get flat() {
+        return this._android.isFlat();
+    }
+
+    set flat(value: boolean) {
+        if (this._isMarker) {
+            this._android.setFlat(value);
+        } else {
+            this._android.flat(value);
+        }
+    }
+
+    
+
+    // @ts-ignore
+    get anchor() {
+        return [this._android.getAnchorU(), this._android.getAnchorV()];
+    }
+
+    set anchor(value: Array<number>) {
+        if (this._isMarker) {
+            this._android.setAnchor(value[0], value[1]);
+        } else {
+            this._android.anchor(value[0], value[1]);
+        }
+    }
+
+    
+
+    // @ts-ignore
+    get draggable() {
+        return this._android.isDraggable();
+    }
+
+    set draggable(value: boolean) {
+        if (this._isMarker) {
+            this._android.setDraggable(value);
+        } else {
+            this._android.draggable(value);
+        }
+    }
+
+    
+
+    // @ts-ignore
+    get visible() {
+        return this._android.isVisible();
+    }
+
+    set visible(value: boolean) {
+        if (this._isMarker) {
+            this._android.setVisible(value);
+        } else {
+            this._android.visible(value);
+        }
+    }
+
+    
+
+    // @ts-ignore
+    get android() {
+        return this._android;
+    }
+
+    set android(android) {
+        this._android = android;
+        this._isMarker = android.getClass().getName() === Marker.CLASS;
+    }
+}
+
+
 export class Projection extends ProjectionBase {
     private _android: any; /* GMSProjection */
     
@@ -822,242 +1074,6 @@ export class Bounds extends BoundsBase {
         return new Bounds(new com.google.android.gms.maps.model.LatLngBounds(southwest.android, northeast.android));
     }
 }
-
-export class Marker extends MarkerBase {
-    private _android: any;
-    private _color: number;
-    private _icon: Image;
-    private _isMarker: boolean = false;
-
-    static CLASS = 'com.google.android.gms.maps.model.Marker';
-
-    constructor() {
-        super();
-        this.android = new com.google.android.gms.maps.model.MarkerOptions();
-    }
-
-
-    
-
-    // @ts-ignore
-    get position() {
-        return new Position(this._android.getPosition());
-    }
-
-    set position(value: Position) {
-        if (this._isMarker) {
-            this._android.setPosition(value.android);
-        } else {
-            this._android.position(value.android);
-        }
-    }
-
-    
-
-    // @ts-ignore
-    get rotation() {
-        return this._android.getRotation();
-    }
-
-    set rotation(value: number) {
-        if (this._isMarker) {
-            this._android.setRotation(value);
-        } else {
-            this._android.rotation(value);
-        }
-    }
-
-    
-
-    // @ts-ignore
-    get zIndex() {
-        return this._android.getZIndex();
-    }
-
-    set zIndex(value: number) {
-        if (this._isMarker) {
-            this._android.setZIndex(value);
-        } else {
-            this._android.zIndex(value);
-        }
-    }
-
-    
-
-    // @ts-ignore
-    get title() {
-        return this._android.getTitle();
-    }
-
-    set title(title: string) {
-        if (this._isMarker) {
-            this._android.setTitle(title);
-        } else {
-            this._android.title(title);
-        }
-    }
-
-    
-
-    // @ts-ignore
-    get snippet() {
-        return this._android.getSnippet();
-    }
-
-    set snippet(snippet: string) {
-        if (this._isMarker) {
-            this._android.setSnippet(snippet);
-        } else {
-            this._android.snippet(snippet);
-        }
-    }
-
-    showInfoWindow(): void {
-        if (this._isMarker) {
-            this.android.showInfoWindow();
-        }
-    }
-
-    isInfoWindowShown(): boolean {
-        return (this._isMarker) ? this._android.showInfoWindow() : false;
-    }
-
-    hideInfoWindow(): void {
-        if (this._isMarker) {
-            this.android.hideInfoWindow();
-        }
-    }
-
-    
-
-    // @ts-ignore
-    get color() {
-        return this._color;
-    }
-
-    set color(value: Color | string | number) {
-        value = getColorHue(value);
-
-        this._color = value;
-
-        var androidIcon = (value) ? com.google.android.gms.maps.model.BitmapDescriptorFactory.defaultMarker(value) : null;
-        if (this._isMarker) {
-            this._android.setIcon(androidIcon);
-        } else {
-            this._android.icon(androidIcon);
-        }
-    }
-
-    
-
-    // @ts-ignore
-    get icon() {
-        return this._icon;
-    }
-
-    set icon(value: Image | string) {
-        if (typeof value === 'string') {
-            var tempIcon = new Image();
-            tempIcon.imageSource = ImageSource.fromResourceSync(String(value));
-            value = tempIcon;
-        }
-        this._icon = value;
-        var androidIcon = (value) ? com.google.android.gms.maps.model.BitmapDescriptorFactory.fromBitmap(value.imageSource.android) : null;
-        if (this._isMarker) {
-            this._android.setIcon(androidIcon);
-        } else {
-            this._android.icon(androidIcon);
-        }
-    }
-
-    
-
-    // @ts-ignore
-    get alpha() {
-        return this._android.getAlpha();
-    }
-
-    set alpha(value: number) {
-        if (this._isMarker) {
-            this._android.setAlpha(value);
-        } else {
-            this._android.alpha(value);
-        }
-    }
-
-    
-
-    // @ts-ignore
-    get flat() {
-        return this._android.isFlat();
-    }
-
-    set flat(value: boolean) {
-        if (this._isMarker) {
-            this._android.setFlat(value);
-        } else {
-            this._android.flat(value);
-        }
-    }
-
-    
-
-    // @ts-ignore
-    get anchor() {
-        return [this._android.getAnchorU(), this._android.getAnchorV()];
-    }
-
-    set anchor(value: Array<number>) {
-        if (this._isMarker) {
-            this._android.setAnchor(value[0], value[1]);
-        } else {
-            this._android.anchor(value[0], value[1]);
-        }
-    }
-
-    
-
-    // @ts-ignore
-    get draggable() {
-        return this._android.isDraggable();
-    }
-
-    set draggable(value: boolean) {
-        if (this._isMarker) {
-            this._android.setDraggable(value);
-        } else {
-            this._android.draggable(value);
-        }
-    }
-
-    
-
-    // @ts-ignore
-    get visible() {
-        return this._android.isVisible();
-    }
-
-    set visible(value: boolean) {
-        if (this._isMarker) {
-            this._android.setVisible(value);
-        } else {
-            this._android.visible(value);
-        }
-    }
-
-    
-
-    // @ts-ignore
-    get android() {
-        return this._android;
-    }
-
-    set android(android) {
-        this._android = android;
-        this._isMarker = android.getClass().getName() === Marker.CLASS;
-    }
-}
-
 
 export class Polyline extends PolylineBase {
     private _android: any;
