@@ -7,7 +7,7 @@ NativeScript plugin for the Google Maps SDK
 
 >This version include the new maps Renderer for android that Google Maps just [annonce it](https://developers.google.com/maps/documentation/android-sdk/renderer)
 
-![NPM version](https://img.shields.io/badge/npm-1.0.2-green)
+![NPM version](https://img.shields.io/badge/npm-1.0.4-green)
 
 [npm-url]: https://www.npmjs.com/package/@kefah/nativescript-google-maps
 [npm-image]: https://www.npmjs.com/package/@kefah/nativescript-google-maps.svg
