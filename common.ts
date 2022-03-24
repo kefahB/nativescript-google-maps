@@ -86,8 +86,6 @@ function onDescendantsLoaded(view: View, callback: () => void) {
     watchLoaded(view, View.loadedEvent);
 }
 
-// @ts-ignore
-export { StyleBase };
 
 export module knownTemplates {
     export const infoWindowTemplate = "infoWindowTemplate";

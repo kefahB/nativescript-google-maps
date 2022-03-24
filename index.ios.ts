@@ -3,8 +3,9 @@ import {
     MarkerBase, PolygonBase, PolylineBase, ProjectionBase,
     PositionBase, ShapeBase, latitudeProperty, VisibleRegionBase,
     longitudeProperty, bearingProperty, zoomProperty,
-    tiltProperty, StyleBase, UISettingsBase, getColorHue
+    tiltProperty, UISettingsBase, getColorHue
 } from "./common";
+import {StyleBase} from "./index";
 import { GC, layout } from "@nativescript/core/utils"
 import { Image, Color, ImageSource } from "@nativescript/core";
 import { Point } from "@nativescript/core/ui/core/view";
